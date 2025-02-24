@@ -7,7 +7,7 @@ import AddTestimonialModal from '../AddTestimonialModal';
 import { Star, ChevronRight, ExternalLink, Share2, Plus, Pencil } from 'lucide-react';
 
 const GraphicDesignTemplate: React.FC = () => {
-  const { config, updateField } = usePortfolioConfig();
+  const { config, updateField, isViewMode, generateShareableLink } = usePortfolioConfig();
   const [activeCategory, setActiveCategory] = React.useState<string>("all");
   const [selectedProject, setSelectedProject] = React.useState<any>(null);
   const [showAddProject, setShowAddProject] = React.useState(false);
@@ -67,7 +67,8 @@ const GraphicDesignTemplate: React.FC = () => {
 
   const handleShare = async () => {
     try {
-      await navigator.clipboard.writeText(window.location.href);
+      const shareableLink = generateShareableLink();
+      await navigator.clipboard.writeText(shareableLink);
       setShowShareTooltip(true);
       setTimeout(() => setShowShareTooltip(false), 2000);
     } catch (err) {
@@ -119,6 +120,16 @@ const GraphicDesignTemplate: React.FC = () => {
     updateField(['software'], newSoftware);
   };
 
+  // Conditionally render edit buttons and controls
+  const renderEditButton = (onClick: () => void, children: React.ReactNode) => {
+    if (isViewMode) return null;
+    return (
+      <button onClick={onClick} className="flex items-center gap-2 px-6 py-2.5 rounded-full bg-purple-500 hover:bg-purple-600 transition-all">
+        {children}
+      </button>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white">
       {/* Navigation */}
@@ -131,20 +142,22 @@ const GraphicDesignTemplate: React.FC = () => {
               <a href="#testimonials" className="text-white/70 hover:text-white transition-colors">Testimonials</a>
               <a href="#contact" className="text-white/70 hover:text-white transition-colors">Contact</a>
             </div>
-            <div className="relative">
-              <button
-                onClick={handleShare}
-                className="flex items-center gap-2 px-6 py-2.5 bg-purple-500 hover:bg-purple-600 rounded-full transition-all"
-              >
-                <Share2 className="w-4 h-4" />
-                <span>Share Portfolio</span>
-              </button>
-              {showShareTooltip && (
-                <div className="absolute top-full right-0 mt-2 px-4 py-2 bg-green-500 text-white rounded-full whitespace-nowrap">
-                  Link copied to clipboard!
-                </div>
-              )}
-            </div>
+            {!isViewMode && (
+              <div className="relative">
+                <button
+                  onClick={handleShare}
+                  className="flex items-center gap-2 px-6 py-2.5 bg-purple-500 hover:bg-purple-600 rounded-full transition-all"
+                >
+                  <Share2 className="w-4 h-4" />
+                  <span>Share Portfolio</span>
+                </button>
+                {showShareTooltip && (
+                  <div className="absolute top-full right-0 mt-2 px-4 py-2 bg-green-500 text-white rounded-full whitespace-nowrap">
+                    Link copied to clipboard!
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </nav>
@@ -157,23 +170,39 @@ const GraphicDesignTemplate: React.FC = () => {
         <div className="relative max-w-7xl mx-auto px-6 py-32">
           <div className="flex flex-col md:flex-row items-center gap-12">
             <div className="flex-1 text-left">
-              <div className="inline-block px-4 py-2 rounded-full bg-purple-500/10 text-purple-400 mb-6">
-                <EditableText
-                  value={config.hero.name}
-                  onChange={(value) => updateField(['hero', 'name'], value)}
-                />
-              </div>
-              <EditableText
-                value={config.hero.title}
-                onChange={(value) => updateField(['hero', 'title'], value)}
-                className="text-5xl md:text-7xl font-bold mb-8 leading-tight"
-                as="h1"
-              />
-              <EditableText
-                value={config.hero.description}
-                onChange={(value) => updateField(['hero', 'description'], value)}
-                className="text-xl text-white/70 max-w-2xl mb-12"
-              />
+              {isViewMode ? (
+                <>
+                  <div className="inline-block px-4 py-2 rounded-full bg-purple-500/10 text-purple-400 mb-6">
+                    {config.hero.name}
+                  </div>
+                  <h1 className="text-5xl md:text-7xl font-bold mb-8 leading-tight">
+                    {config.hero.title}
+                  </h1>
+                  <p className="text-xl text-white/70 max-w-2xl mb-12">
+                    {config.hero.description}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <div className="inline-block px-4 py-2 rounded-full bg-purple-500/10 text-purple-400 mb-6">
+                    <EditableText
+                      value={config.hero.name}
+                      onChange={(value) => updateField(['hero', 'name'], value)}
+                    />
+                  </div>
+                  <EditableText
+                    value={config.hero.title}
+                    onChange={(value) => updateField(['hero', 'title'], value)}
+                    className="text-5xl md:text-7xl font-bold mb-8 leading-tight"
+                    as="h1"
+                  />
+                  <EditableText
+                    value={config.hero.description}
+                    onChange={(value) => updateField(['hero', 'description'], value)}
+                    className="text-xl text-white/70 max-w-2xl mb-12"
+                  />
+                </>
+              )}
               <div className="flex items-center gap-6">
                 <a 
                   href="#work"
@@ -206,13 +235,12 @@ const GraphicDesignTemplate: React.FC = () => {
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-12">
             <h2 className="text-4xl font-bold">Skills & Expertise</h2>
-            <button
-              onClick={handleAddSkill}
-              className="flex items-center gap-2 px-6 py-2.5 rounded-full bg-purple-500 hover:bg-purple-600 transition-all"
-            >
-              <Plus className="w-4 h-4" />
-              Add Skill
-            </button>
+            {renderEditButton(handleAddSkill, (
+              <>
+                <Plus className="w-4 h-4" />
+                Add Skill
+              </>
+            ))}
           </div>
 
           <div className="grid md:grid-cols-2 gap-8">
@@ -292,13 +320,12 @@ const GraphicDesignTemplate: React.FC = () => {
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-12">
             <h2 className="text-4xl font-bold">Software Proficiency</h2>
-            <button
-              onClick={handleAddSoftware}
-              className="flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#1c1c1c] hover:bg-[#2a2a2a] border border-[#333] text-white transition-all"
-            >
-              <Plus className="w-4 h-4" />
-              Add Software
-            </button>
+            {renderEditButton(handleAddSoftware, (
+              <>
+                <Plus className="w-4 h-4" />
+                Add Software
+              </>
+            ))}
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -414,12 +441,14 @@ const GraphicDesignTemplate: React.FC = () => {
                   {category.charAt(0).toUpperCase() + category.slice(1)}
                 </button>
               ))}
-              <button
-                onClick={() => setShowAddProject(true)}
-                className="px-6 py-2.5 rounded-full bg-purple-500 hover:bg-purple-600 text-white transition-all"
-              >
-                Add Project
-              </button>
+              {!isViewMode && (
+                <button
+                  onClick={() => setShowAddProject(true)}
+                  className="px-6 py-2.5 rounded-full bg-purple-500 hover:bg-purple-600 text-white transition-all"
+                >
+                  Add Project
+                </button>
+              )}
             </div>
           </div>
 
@@ -467,12 +496,7 @@ const GraphicDesignTemplate: React.FC = () => {
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold mb-4">Client Testimonials</h2>
             <p className="text-white/70">What my clients say about working with me</p>
-            <button
-              onClick={() => setShowAddTestimonial(true)}
-              className="mt-4 px-6 py-2.5 rounded-full bg-purple-500 hover:bg-purple-600 text-white transition-all"
-            >
-              Add Testimonial
-            </button>
+            {renderEditButton(() => setShowAddTestimonial(true), "Add Testimonial")}
           </div>
 
           <div className="grid md:grid-cols-2 gap-8">
