@@ -170,15 +170,14 @@ const AddProjectModal: React.FC<AddProjectModalProps> = ({ onClose, onSave }) =>
 
               <div>
                 <label className="block text-sm font-medium text-white/70 mb-2">
-                  Project Link
+                  Project Link <span className="text-white/40">(Optional)</span>
                 </label>
                 <input
                   type="url"
                   value={formData.link}
                   onChange={(e) => setFormData(prev => ({ ...prev, link: e.target.value }))}
                   className="w-full bg-white/5 rounded-lg px-3 py-2 text-white"
-                  placeholder="https://..."
-                  required
+                  placeholder="https://... (Optional)"
                 />
               </div>
             </div>

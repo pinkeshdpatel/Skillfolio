@@ -6,6 +6,16 @@ export type PortfolioConfig = {
     description: string;
     image: string;
   };
+  skills: {
+    name: string;
+    proficiency: number; // 0-100
+    category: string;
+  }[];
+  software: {
+    name: string;
+    icon: string;
+    proficiency: number; // 0-100
+  }[];
   projects: {
     title: string;
     description: string;
@@ -43,6 +53,46 @@ export const defaultConfig: PortfolioConfig = {
     description: "I am a fervent web design enthusiast. My commitment lies in creating aesthetically stunning and operationally vigorous websites.",
     image: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&q=80"
   },
+  skills: [
+    { name: "UI/UX Design", proficiency: 95, category: "Design" },
+    { name: "Brand Identity", proficiency: 90, category: "Branding" },
+    { name: "Web Design", proficiency: 88, category: "Design" },
+    { name: "Typography", proficiency: 85, category: "Design" },
+    { name: "Motion Design", proficiency: 80, category: "Animation" },
+    { name: "Print Design", proficiency: 75, category: "Design" }
+  ],
+  software: [
+    { 
+      name: "Adobe Photoshop", 
+      icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/photoshop/photoshop-plain.svg", 
+      proficiency: 95 
+    },
+    { 
+      name: "Adobe Illustrator", 
+      icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/illustrator/illustrator-plain.svg", 
+      proficiency: 90 
+    },
+    { 
+      name: "Figma", 
+      icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/figma/figma-original.svg", 
+      proficiency: 88 
+    },
+    { 
+      name: "Adobe XD", 
+      icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/xd/xd-plain.svg", 
+      proficiency: 85 
+    },
+    { 
+      name: "Adobe InDesign", 
+      icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/indesign/indesign-plain.svg", 
+      proficiency: 80 
+    },
+    { 
+      name: "Adobe After Effects", 
+      icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/aftereffects/aftereffects-plain.svg", 
+      proficiency: 75 
+    }
+  ],
   projects: [
     {
       title: "Brand Identity - TechVision",
