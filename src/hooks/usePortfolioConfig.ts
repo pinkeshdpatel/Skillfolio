@@ -129,13 +129,22 @@ export const usePortfolioConfig = () => {
     localStorage.setItem('portfolioConfig', JSON.stringify(newConfig));
   };
 
-  const generateShareableLink = () => {
+  const generateShareableLink = (customUsername?: string) => {
     try {
-      // Use the hero name as the username (sanitized for URLs)
-      const username = config.hero.name
+      // Use custom username if provided, otherwise generate from hero name
+      let username = customUsername;
+      if (!username) {
+        username = config.hero.name
+          .toLowerCase()
+          .replace(/[^a-z0-9]/g, '')
+          .replace(/\s+/g, '');
+      }
+      
+      // Sanitize the username to ensure it's URL-safe
+      username = username
         .toLowerCase()
-        .replace(/[^a-z0-9]/g, '')
-        .replace(/\s+/g, '');
+        .replace(/[^a-z0-9-]/g, '')
+        .replace(/\s+/g, '-');
       
       // Create a deep clone of the current config
       const configToShare = JSON.parse(JSON.stringify(config));

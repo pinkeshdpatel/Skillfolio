@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { usePortfolioConfig } from '../../hooks/usePortfolioConfig';
 import EditableText from '../EditableText';
 import ImageUploader from '../ImageUploader';
 import AddProjectModal from '../AddProjectModal';
 import AddTestimonialModal from '../AddTestimonialModal';
-import { Star, ChevronRight, ExternalLink, Share2, Plus, Pencil } from 'lucide-react';
+import { Star, ChevronRight, ExternalLink, Share2, Plus, Pencil, Trash2 } from 'lucide-react';
 
 const GraphicDesignTemplate: React.FC = () => {
   const { config, updateField, isViewMode, generateShareableLink, isLoading } = usePortfolioConfig();
@@ -15,6 +15,8 @@ const GraphicDesignTemplate: React.FC = () => {
   const [showShareTooltip, setShowShareTooltip] = React.useState(false);
   const [editingSkill, setEditingSkill] = React.useState<number | null>(null);
   const [editingSoftware, setEditingSoftware] = React.useState<number | null>(null);
+  const [showShareDialog, setShowShareDialog] = useState(false);
+  const [customUsername, setCustomUsername] = useState('');
 
   // Remove the local loading state since we're using the one from usePortfolioConfig
   React.useEffect(() => {
@@ -85,12 +87,17 @@ const GraphicDesignTemplate: React.FC = () => {
   };
 
   const handleShare = async () => {
+    setShowShareDialog(true);
+  };
+
+  const handleShareConfirm = async () => {
     try {
-      const shareableLink = generateShareableLink();
+      const shareableLink = generateShareableLink(customUsername);
       if (!shareableLink) {
         throw new Error('Failed to generate shareable link');
       }
       await navigator.clipboard.writeText(shareableLink);
+      setShowShareDialog(false);
       setShowShareTooltip(true);
       setTimeout(() => setShowShareTooltip(false), 2000);
     } catch (err) {
@@ -184,6 +191,42 @@ const GraphicDesignTemplate: React.FC = () => {
           </div>
         </div>
       </nav>
+
+      {/* Share Dialog */}
+      {showShareDialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90">
+          <div className="bg-[#0A0A0A] rounded-xl w-full max-w-md p-6">
+            <h3 className="text-xl font-semibold mb-4">Share Portfolio</h3>
+            <div className="mb-6">
+              <label className="block text-sm text-white/70 mb-2">
+                Choose a username for your portfolio URL
+              </label>
+              <input
+                type="text"
+                value={customUsername}
+                onChange={(e) => setCustomUsername(e.target.value.toLowerCase())}
+                placeholder="e.g., johndoe or my-portfolio"
+                className="w-full bg-white/5 rounded-lg px-3 py-2 text-white"
+              />
+            </div>
+            <div className="flex justify-end gap-4">
+              <button
+                onClick={() => setShowShareDialog(false)}
+                className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleShareConfirm}
+                className="px-4 py-2 rounded-lg bg-purple-500 hover:bg-purple-600 transition-colors"
+                disabled={!customUsername}
+              >
+                Generate Link
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Hero Section */}
       <section id="home" className="relative min-h-screen flex items-center justify-center pt-20">
@@ -487,15 +530,19 @@ const GraphicDesignTemplate: React.FC = () => {
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeleteProject(index);
-                    }}
-                    className="absolute top-4 right-4 p-2.5 rounded-full bg-red-500/80 hover:bg-red-600 transition-all flex items-center justify-center w-8 h-8"
-                  >
-                    ✕
-                  </button>
+                  {!isViewMode && (
+                    <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteProject(index);
+                        }}
+                        className="p-2 rounded-full bg-red-500/80 hover:bg-red-600 transition-all"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
                   <div 
                     className="absolute bottom-0 left-0 right-0 p-8"
                     onClick={() => handleProjectClick(project)}
@@ -528,12 +575,14 @@ const GraphicDesignTemplate: React.FC = () => {
                 key={index}
                 className="group relative bg-white/5 rounded-2xl p-8 backdrop-blur-sm border border-white/10 hover:bg-white/10 transition-all"
               >
-                <button
-                  onClick={() => handleDeleteTestimonial(index)}
-                  className="absolute top-4 right-4 p-2.5 rounded-full bg-red-500/80 hover:bg-red-600 transition-all flex items-center justify-center w-8 h-8 opacity-0 group-hover:opacity-100"
-                >
-                  ✕
-                </button>
+                {!isViewMode && (
+                  <button
+                    onClick={() => handleDeleteTestimonial(index)}
+                    className="absolute top-4 right-4 p-2.5 rounded-full bg-red-500/80 hover:bg-red-600 transition-all flex items-center justify-center w-8 h-8 opacity-0 group-hover:opacity-100"
+                  >
+                    ✕
+                  </button>
+                )}
                 <div className="flex items-start gap-4 mb-6">
                   <ImageUploader
                     value={testimonial.image}
