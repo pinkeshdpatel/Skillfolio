@@ -6,6 +6,16 @@ import PortfolioTemplate from './components/PortfolioTemplate';
 import ProfilePage from './components/ProfilePage';
 import GraphicDesignTemplate from './components/templates/GraphicDesignTemplate';
 import DevelopmentTemplate from './components/templates/DevelopmentTemplate';
+import { usePortfolioConfig } from './hooks/usePortfolioConfig';
+
+const SharedPortfolio = () => {
+  const { templateType } = usePortfolioConfig();
+  
+  if (templateType === 'development') {
+    return <DevelopmentTemplate />;
+  }
+  return <GraphicDesignTemplate />;
+};
 
 function App() {
   return (
@@ -19,7 +29,7 @@ function App() {
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/templates/graphic" element={<GraphicDesignTemplate />} />
         <Route path="/templates/development" element={<DevelopmentTemplate />} />
-        <Route path="/:username" element={<GraphicDesignTemplate />} />
+        <Route path="/:username" element={<SharedPortfolio />} />
       </Routes>
     </Router>
   );
