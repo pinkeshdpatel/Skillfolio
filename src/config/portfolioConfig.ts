@@ -1,5 +1,11 @@
 // Portfolio Configuration
 export type PortfolioConfig = {
+  name?: string;
+  firstName?: string;
+  specialization?: string;
+  additionalSpecialization?: string;
+  avatar?: string;
+  email?: string;
   hero: {
     name: string;
     title: string;
