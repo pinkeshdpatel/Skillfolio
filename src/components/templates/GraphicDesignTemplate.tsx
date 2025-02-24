@@ -15,22 +15,60 @@ const GraphicDesignTemplate: React.FC = () => {
   const [showShareTooltip, setShowShareTooltip] = React.useState(false);
   const [editingSkill, setEditingSkill] = React.useState<number | null>(null);
   const [editingSoftware, setEditingSoftware] = React.useState<number | null>(null);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
 
   // Initialize config with default values if not present
   React.useEffect(() => {
-    if (!config.skills) {
-      updateField(['skills'], []);
-    }
-    if (!config.software) {
-      updateField(['software'], []);
-    }
-    if (!config.projects) {
-      updateField(['projects'], []);
-    }
-    if (!config.testimonials) {
-      updateField(['testimonials'], []);
+    try {
+      setIsLoading(true);
+      if (!config.skills) {
+        updateField(['skills'], []);
+      }
+      if (!config.software) {
+        updateField(['software'], []);
+      }
+      if (!config.projects) {
+        updateField(['projects'], []);
+      }
+      if (!config.testimonials) {
+        updateField(['testimonials'], []);
+      }
+      setError(null);
+    } catch (err) {
+      setError('Failed to initialize portfolio configuration');
+      console.error('Error initializing config:', err);
+    } finally {
+      setIsLoading(false);
     }
   }, [config]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#0A0A0A] text-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500 mx-auto mb-4"></div>
+          <p className="text-lg">Loading portfolio...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-[#0A0A0A] text-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-500 text-xl mb-4">⚠️ {error}</div>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-4 py-2 bg-purple-500 rounded-lg hover:bg-purple-600 transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const categories = ["all", ...new Set(config.projects.map(p => p.category))];
   const filteredProjects = activeCategory === "all" 
