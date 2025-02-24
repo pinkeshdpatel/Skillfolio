@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 473.17 102.22">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #fff;
+        font-family: GlancyrNeue-SemiBoldExpanded, 'Glancyr Neue';
+        font-size: 93.87px;
+        font-weight: 600;
+        background: linear-gradient(90deg, #4F46E5 0%, #E879F9 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .cls-2 {
+        letter-spacing: -.03em;
+      }
+    </style>
+  </defs>
+  <text class="cls-1" transform="translate(0 79.78)"><tspan x="0" y="0">SKill</tspan><tspan class="cls-2" x="222.65" y="0">F</tspan><tspan x="287.32" y="0">olio</tspan></text>
+</svg>

@@ -147,8 +147,8 @@ const LandingPage: React.FC = () => {
         ctaText={user ? "Create Portfolio" : "Get Started"}
         ctaHref={user ? "/profile" : "#"}
         bottomImage={{
-          light: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2072&q=80",
-          dark: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2072&q=80"
+          light: "/hero-image.jpeg",
+          dark: "/hero-image.jpeg"
         }}
         gridOptions={{
           angle: 65,
