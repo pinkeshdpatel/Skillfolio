@@ -286,11 +286,21 @@ const GraphicDesignTemplate: React.FC = () => {
               </div>
             </div>
             <div className="flex-1 relative">
-              <ImageUploader
-                value={config.hero.image}
-                onChange={(url) => updateField(['hero', 'image'], url)}
-                className="aspect-square rounded-3xl overflow-hidden"
-              />
+              {isViewMode ? (
+                <div className="aspect-square rounded-3xl overflow-hidden">
+                  <img
+                    src={config.hero.image}
+                    alt="Hero"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ) : (
+                <ImageUploader
+                  value={config.hero.image}
+                  onChange={(url) => updateField(['hero', 'image'], url)}
+                  className="aspect-square rounded-3xl overflow-hidden"
+                />
+              )}
             </div>
           </div>
         </div>
@@ -313,7 +323,7 @@ const GraphicDesignTemplate: React.FC = () => {
             {(config.skills || []).map((skill, index) => (
               <div
                 key={index}
-                className="group relative bg-gradient-to-br from-purple-500/5 to-purple-900/20 rounded-2xl p-8 backdrop-blur-sm border border-purple-500/10 hover:border-purple-500/20 transition-all"
+                className={`group relative bg-gradient-to-br from-purple-500/5 to-purple-900/20 rounded-2xl p-8 backdrop-blur-sm border border-purple-500/10 ${!isViewMode ? 'hover:border-purple-500/20' : ''} transition-all`}
               >
                 {editingSkill === index ? (
                   <div className="space-y-4">
@@ -351,20 +361,22 @@ const GraphicDesignTemplate: React.FC = () => {
                         <h3 className="text-2xl font-semibold mb-2">{skill.name}</h3>
                         <p className="text-purple-400 text-sm uppercase tracking-wider font-medium">{skill.category}</p>
                       </div>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => setEditingSkill(index)}
-                          className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors opacity-0 group-hover:opacity-100"
-                        >
-                          <Pencil className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteSkill(index)}
-                          className="p-2 rounded-full bg-red-500/80 hover:bg-red-600 transition-colors opacity-0 group-hover:opacity-100"
-                        >
-                          ✕
-                        </button>
-                      </div>
+                      {!isViewMode && (
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => setEditingSkill(index)}
+                            className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors opacity-0 group-hover:opacity-100"
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteSkill(index)}
+                            className="p-2 rounded-full bg-red-500/80 hover:bg-red-600 transition-colors opacity-0 group-hover:opacity-100"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      )}
                     </div>
                     <div className="relative w-full h-3 bg-purple-900/20 rounded-full overflow-hidden">
                       <div
@@ -398,7 +410,7 @@ const GraphicDesignTemplate: React.FC = () => {
             {(config.software || []).map((software, index) => (
               <div
                 key={index}
-                className="group relative bg-[#1c1c1c] rounded-full p-4 border border-[#333] hover:bg-[#2a2a2a] hover:border-purple-500/50 transition-all duration-300"
+                className={`group relative bg-[#1c1c1c] rounded-full p-4 border border-[#333] ${!isViewMode ? 'hover:bg-[#2a2a2a] hover:border-purple-500/50' : ''} transition-all duration-300`}
               >
                 {editingSoftware === index ? (
                   <div className="space-y-4 p-4">
@@ -466,20 +478,22 @@ const GraphicDesignTemplate: React.FC = () => {
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button
-                        onClick={() => setEditingSoftware(index)}
-                        className="p-1.5 rounded-full bg-[#2a2a2a] hover:bg-[#333] border border-[#333] transition-colors"
-                      >
-                        <Pencil className="w-3 h-3" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteSoftware(index)}
-                        className="p-1.5 rounded-full bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-500 transition-colors"
-                      >
-                        <span className="text-xs">✕</span>
-                      </button>
-                    </div>
+                    {!isViewMode && (
+                      <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          onClick={() => setEditingSoftware(index)}
+                          className="p-1.5 rounded-full bg-[#2a2a2a] hover:bg-[#333] border border-[#333] transition-colors"
+                        >
+                          <Pencil className="w-3 h-3" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteSoftware(index)}
+                          className="p-1.5 rounded-full bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-500 transition-colors"
+                        >
+                          <span className="text-xs">✕</span>
+                        </button>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -573,7 +587,7 @@ const GraphicDesignTemplate: React.FC = () => {
             {config.testimonials.map((testimonial, index) => (
               <div 
                 key={index}
-                className="group relative bg-white/5 rounded-2xl p-8 backdrop-blur-sm border border-white/10 hover:bg-white/10 transition-all"
+                className={`group relative bg-white/5 rounded-2xl p-8 backdrop-blur-sm border border-white/10 ${!isViewMode ? 'hover:bg-white/10' : ''} transition-all`}
               >
                 {!isViewMode && (
                   <button
@@ -584,12 +598,22 @@ const GraphicDesignTemplate: React.FC = () => {
                   </button>
                 )}
                 <div className="flex items-start gap-4 mb-6">
-                  <ImageUploader
-                    value={testimonial.image}
-                    onChange={(url) => updateField(['testimonials', index, 'image'], url)}
-                    className="w-16 h-16 rounded-full"
-                    isProfileImage={true}
-                  />
+                  {isViewMode ? (
+                    <div className="w-16 h-16 rounded-full overflow-hidden">
+                      <img
+                        src={testimonial.image}
+                        alt={testimonial.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <ImageUploader
+                      value={testimonial.image}
+                      onChange={(url) => updateField(['testimonials', index, 'image'], url)}
+                      className="w-16 h-16 rounded-full"
+                      isProfileImage={true}
+                    />
+                  )}
                   <div>
                     <h3 className="font-semibold text-xl">{testimonial.name}</h3>
                     <p className="text-white/70">{testimonial.role}</p>
