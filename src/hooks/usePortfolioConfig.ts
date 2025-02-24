@@ -2,21 +2,32 @@ import { useState, useEffect } from 'react';
 import { PortfolioConfig, defaultConfig } from '../config/portfolioConfig';
 
 export const usePortfolioConfig = () => {
-  const [config, setConfig] = useState<PortfolioConfig>(defaultConfig);
+  const [config, setConfig] = useState<PortfolioConfig>({
+    ...defaultConfig,
+    hero: { ...defaultConfig.hero },
+    skills: [...defaultConfig.skills],
+    software: [...defaultConfig.software],
+    projects: [...defaultConfig.projects],
+    testimonials: [...defaultConfig.testimonials],
+    clients: [...defaultConfig.clients],
+    contact: { ...defaultConfig.contact }
+  });
   const [isViewMode, setIsViewMode] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Check for view mode and shared config ID in URL
   useEffect(() => {
-    const loadConfig = () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      const sharedId = urlParams.get('share');
-      
-      console.log('Loading config with sharedId:', sharedId);
-      
-      if (sharedId) {
-        setIsViewMode(true);
-        // Try to load shared configuration from localStorage
-        try {
+    const loadConfig = async () => {
+      try {
+        setIsLoading(true);
+        const urlParams = new URLSearchParams(window.location.search);
+        const sharedId = urlParams.get('share');
+        
+        console.log('Loading config with sharedId:', sharedId);
+        
+        if (sharedId) {
+          setIsViewMode(true);
+          // Try to load shared configuration from localStorage
           const savedConfigs = localStorage.getItem('sharedPortfolios');
           console.log('Saved shared configs:', savedConfigs);
           
@@ -30,14 +41,15 @@ export const usePortfolioConfig = () => {
               const mergedConfig = {
                 ...defaultConfig,
                 ...sharedConfig,
-                skills: sharedConfig.skills || defaultConfig.skills,
-                software: sharedConfig.software || defaultConfig.software,
-                projects: sharedConfig.projects || defaultConfig.projects,
-                testimonials: sharedConfig.testimonials || defaultConfig.testimonials,
                 hero: {
                   ...defaultConfig.hero,
                   ...sharedConfig.hero
                 },
+                skills: sharedConfig.skills || [...defaultConfig.skills],
+                software: sharedConfig.software || [...defaultConfig.software],
+                projects: sharedConfig.projects || [...defaultConfig.projects],
+                testimonials: sharedConfig.testimonials || [...defaultConfig.testimonials],
+                clients: sharedConfig.clients || [...defaultConfig.clients],
                 contact: {
                   ...defaultConfig.contact,
                   ...sharedConfig.contact
@@ -45,32 +57,25 @@ export const usePortfolioConfig = () => {
               };
               console.log('Setting merged config:', mergedConfig);
               setConfig(mergedConfig);
-              return;
             }
           }
-          console.warn('No shared configuration found for ID:', sharedId);
-          setConfig(defaultConfig);
-        } catch (error) {
-          console.error('Error loading shared config:', error);
-          setConfig(defaultConfig);
-        }
-      } else {
-        // Load config from localStorage for editing mode
-        try {
+        } else {
+          // Load config from localStorage for editing mode
           const savedConfig = localStorage.getItem('portfolioConfig');
           if (savedConfig) {
             const parsedConfig = JSON.parse(savedConfig);
             const mergedConfig = {
               ...defaultConfig,
               ...parsedConfig,
-              skills: parsedConfig.skills || defaultConfig.skills,
-              software: parsedConfig.software || defaultConfig.software,
-              projects: parsedConfig.projects || defaultConfig.projects,
-              testimonials: parsedConfig.testimonials || defaultConfig.testimonials,
               hero: {
                 ...defaultConfig.hero,
                 ...parsedConfig.hero
               },
+              skills: parsedConfig.skills || [...defaultConfig.skills],
+              software: parsedConfig.software || [...defaultConfig.software],
+              projects: parsedConfig.projects || [...defaultConfig.projects],
+              testimonials: parsedConfig.testimonials || [...defaultConfig.testimonials],
+              clients: parsedConfig.clients || [...defaultConfig.clients],
               contact: {
                 ...defaultConfig.contact,
                 ...parsedConfig.contact
@@ -78,15 +83,27 @@ export const usePortfolioConfig = () => {
             };
             setConfig(mergedConfig);
           }
-        } catch (error) {
-          console.error('Error loading config:', error);
-          setConfig(defaultConfig);
         }
+      } catch (error) {
+        console.error('Error loading config:', error);
+        // Reset to default config on error
+        setConfig({
+          ...defaultConfig,
+          hero: { ...defaultConfig.hero },
+          skills: [...defaultConfig.skills],
+          software: [...defaultConfig.software],
+          projects: [...defaultConfig.projects],
+          testimonials: [...defaultConfig.testimonials],
+          clients: [...defaultConfig.clients],
+          contact: { ...defaultConfig.contact }
+        });
+      } finally {
+        setIsLoading(false);
       }
     };
 
     loadConfig();
-  }, [window.location.search]); // Re-run when search params change
+  }, [window.location.search]);
 
   const updateConfig = (newConfig: Partial<PortfolioConfig>) => {
     if (isViewMode) return; // Prevent updates in view mode
@@ -115,23 +132,31 @@ export const usePortfolioConfig = () => {
     // Generate a unique ID for the shared config
     const sharedId = Math.random().toString(36).substring(2, 15);
     
-    // Save the current config to shared portfolios in localStorage
     try {
+      // Save a complete copy of the current config
+      const configToShare = {
+        ...config,
+        hero: { ...config.hero },
+        skills: [...config.skills],
+        software: [...config.software],
+        projects: [...config.projects],
+        testimonials: [...config.testimonials],
+        clients: [...config.clients],
+        contact: { ...config.contact }
+      };
+      
+      // Get or initialize shared configs
       const savedConfigs = localStorage.getItem('sharedPortfolios') || '{}';
       const configs = JSON.parse(savedConfigs);
       
-      // Save a complete copy of the current config
-      configs[sharedId] = { ...config };
-      
-      // Store in localStorage
+      // Save the config
+      configs[sharedId] = configToShare;
       localStorage.setItem('sharedPortfolios', JSON.stringify(configs));
-      console.log('Saved shared config:', configs[sharedId]);
-      
-      // Get the current template from the URL
-      const currentPath = window.location.pathname;
-      const template = currentPath.includes('development') ? 'development' : 'graphic';
+      console.log('Saved shared config:', configToShare);
       
       // Generate the shareable URL
+      const currentPath = window.location.pathname;
+      const template = currentPath.includes('development') ? 'development' : 'graphic';
       const baseUrl = window.location.origin;
       const shareableLink = `${baseUrl}/templates/${template}?share=${sharedId}`;
       console.log('Generated shareable link:', shareableLink);
@@ -144,7 +169,17 @@ export const usePortfolioConfig = () => {
 
   const resetConfig = () => {
     if (isViewMode) return; // Prevent reset in view mode
-    setConfig(defaultConfig);
+    const freshConfig = {
+      ...defaultConfig,
+      hero: { ...defaultConfig.hero },
+      skills: [...defaultConfig.skills],
+      software: [...defaultConfig.software],
+      projects: [...defaultConfig.projects],
+      testimonials: [...defaultConfig.testimonials],
+      clients: [...defaultConfig.clients],
+      contact: { ...defaultConfig.contact }
+    };
+    setConfig(freshConfig);
     localStorage.removeItem('portfolioConfig');
   };
 
@@ -154,6 +189,7 @@ export const usePortfolioConfig = () => {
     updateField, 
     resetConfig, 
     isViewMode,
-    generateShareableLink 
+    generateShareableLink,
+    isLoading
   };
 };

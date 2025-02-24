@@ -7,7 +7,7 @@ import AddTestimonialModal from '../AddTestimonialModal';
 import { Star, ChevronRight, ExternalLink, Share2, Plus, Pencil } from 'lucide-react';
 
 const GraphicDesignTemplate: React.FC = () => {
-  const { config, updateField, isViewMode, generateShareableLink } = usePortfolioConfig();
+  const { config, updateField, isViewMode, generateShareableLink, isLoading } = usePortfolioConfig();
   const [activeCategory, setActiveCategory] = React.useState<string>("all");
   const [selectedProject, setSelectedProject] = React.useState<any>(null);
   const [showAddProject, setShowAddProject] = React.useState(false);
@@ -15,58 +15,14 @@ const GraphicDesignTemplate: React.FC = () => {
   const [showShareTooltip, setShowShareTooltip] = React.useState(false);
   const [editingSkill, setEditingSkill] = React.useState<number | null>(null);
   const [editingSoftware, setEditingSoftware] = React.useState<number | null>(null);
-  const [isLoading, setIsLoading] = React.useState(true);
-  const [error, setError] = React.useState<string | null>(null);
 
-  // Initialize config with default values if not present
+  // Remove the local loading state since we're using the one from usePortfolioConfig
   React.useEffect(() => {
-    let mounted = true;
-
-    const initializeConfig = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-
-        // Wait a bit to ensure localStorage is ready
-        await new Promise(resolve => setTimeout(resolve, 100));
-
-        if (!mounted) return;
-
-        if (!config.skills) {
-          updateField(['skills'], []);
-        }
-        if (!config.software) {
-          updateField(['software'], []);
-        }
-        if (!config.projects) {
-          updateField(['projects'], []);
-        }
-        if (!config.testimonials) {
-          updateField(['testimonials'], []);
-        }
-
-        // Verify the config is properly loaded
-        if (!config.hero || !config.hero.name) {
-          throw new Error('Portfolio configuration failed to load properly');
-        }
-      } catch (err) {
-        console.error('Error initializing config:', err);
-        if (mounted) {
-          setError('Failed to initialize portfolio configuration. Please try refreshing the page.');
-        }
-      } finally {
-        if (mounted) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    initializeConfig();
-
-    return () => {
-      mounted = false;
-    };
-  }, [config, updateField]);
+    if (!config) {
+      console.error('Configuration is not loaded properly');
+      return;
+    }
+  }, [config]);
 
   if (isLoading) {
     return (
@@ -79,11 +35,11 @@ const GraphicDesignTemplate: React.FC = () => {
     );
   }
 
-  if (error) {
+  if (!config || !config.hero) {
     return (
       <div className="min-h-screen bg-[#0A0A0A] text-white flex items-center justify-center">
         <div className="text-center">
-          <div className="text-red-500 text-xl mb-4">⚠️ {error}</div>
+          <div className="text-red-500 text-xl mb-4">⚠️ Failed to load portfolio configuration</div>
           <button 
             onClick={() => window.location.reload()} 
             className="px-4 py-2 bg-purple-500 rounded-lg hover:bg-purple-600 transition-colors"
