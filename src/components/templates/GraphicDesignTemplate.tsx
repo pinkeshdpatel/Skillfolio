@@ -20,28 +20,53 @@ const GraphicDesignTemplate: React.FC = () => {
 
   // Initialize config with default values if not present
   React.useEffect(() => {
-    try {
-      setIsLoading(true);
-      if (!config.skills) {
-        updateField(['skills'], []);
+    let mounted = true;
+
+    const initializeConfig = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        // Wait a bit to ensure localStorage is ready
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        if (!mounted) return;
+
+        if (!config.skills) {
+          updateField(['skills'], []);
+        }
+        if (!config.software) {
+          updateField(['software'], []);
+        }
+        if (!config.projects) {
+          updateField(['projects'], []);
+        }
+        if (!config.testimonials) {
+          updateField(['testimonials'], []);
+        }
+
+        // Verify the config is properly loaded
+        if (!config.hero || !config.hero.name) {
+          throw new Error('Portfolio configuration failed to load properly');
+        }
+      } catch (err) {
+        console.error('Error initializing config:', err);
+        if (mounted) {
+          setError('Failed to initialize portfolio configuration. Please try refreshing the page.');
+        }
+      } finally {
+        if (mounted) {
+          setIsLoading(false);
+        }
       }
-      if (!config.software) {
-        updateField(['software'], []);
-      }
-      if (!config.projects) {
-        updateField(['projects'], []);
-      }
-      if (!config.testimonials) {
-        updateField(['testimonials'], []);
-      }
-      setError(null);
-    } catch (err) {
-      setError('Failed to initialize portfolio configuration');
-      console.error('Error initializing config:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [config]);
+    };
+
+    initializeConfig();
+
+    return () => {
+      mounted = false;
+    };
+  }, [config, updateField]);
 
   if (isLoading) {
     return (
@@ -106,11 +131,15 @@ const GraphicDesignTemplate: React.FC = () => {
   const handleShare = async () => {
     try {
       const shareableLink = generateShareableLink();
+      if (!shareableLink) {
+        throw new Error('Failed to generate shareable link');
+      }
       await navigator.clipboard.writeText(shareableLink);
       setShowShareTooltip(true);
       setTimeout(() => setShowShareTooltip(false), 2000);
     } catch (err) {
-      console.error('Failed to copy URL:', err);
+      console.error('Failed to share:', err);
+      alert('Failed to generate shareable link. Please try again.');
     }
   };
 

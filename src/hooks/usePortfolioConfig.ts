@@ -7,58 +7,86 @@ export const usePortfolioConfig = () => {
 
   // Check for view mode and shared config ID in URL
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const sharedId = urlParams.get('share');
-    
-    if (sharedId) {
-      setIsViewMode(true);
-      // Try to load shared configuration from localStorage
-      try {
-        const savedConfigs = localStorage.getItem('sharedPortfolios') || '{}';
-        const configs = JSON.parse(savedConfigs);
-        const sharedConfig = configs[sharedId];
-        
-        if (sharedConfig) {
-          // Merge with default config to ensure all required fields exist
-          const mergedConfig = {
-            ...defaultConfig,
-            ...sharedConfig,
-            skills: sharedConfig.skills || defaultConfig.skills,
-            software: sharedConfig.software || defaultConfig.software,
-            projects: sharedConfig.projects || defaultConfig.projects,
-            testimonials: sharedConfig.testimonials || defaultConfig.testimonials
-          };
-          setConfig(mergedConfig);
-        } else {
-          console.warn('Shared configuration not found');
+    const loadConfig = () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const sharedId = urlParams.get('share');
+      
+      console.log('Loading config with sharedId:', sharedId);
+      
+      if (sharedId) {
+        setIsViewMode(true);
+        // Try to load shared configuration from localStorage
+        try {
+          const savedConfigs = localStorage.getItem('sharedPortfolios');
+          console.log('Saved shared configs:', savedConfigs);
+          
+          if (savedConfigs) {
+            const configs = JSON.parse(savedConfigs);
+            const sharedConfig = configs[sharedId];
+            console.log('Found shared config:', sharedConfig);
+            
+            if (sharedConfig) {
+              // Merge with default config to ensure all required fields exist
+              const mergedConfig = {
+                ...defaultConfig,
+                ...sharedConfig,
+                skills: sharedConfig.skills || defaultConfig.skills,
+                software: sharedConfig.software || defaultConfig.software,
+                projects: sharedConfig.projects || defaultConfig.projects,
+                testimonials: sharedConfig.testimonials || defaultConfig.testimonials,
+                hero: {
+                  ...defaultConfig.hero,
+                  ...sharedConfig.hero
+                },
+                contact: {
+                  ...defaultConfig.contact,
+                  ...sharedConfig.contact
+                }
+              };
+              console.log('Setting merged config:', mergedConfig);
+              setConfig(mergedConfig);
+              return;
+            }
+          }
+          console.warn('No shared configuration found for ID:', sharedId);
+          setConfig(defaultConfig);
+        } catch (error) {
+          console.error('Error loading shared config:', error);
           setConfig(defaultConfig);
         }
-      } catch (error) {
-        console.error('Error loading shared config:', error);
-        setConfig(defaultConfig);
-      }
-    } else {
-      // Load config from localStorage for editing mode
-      try {
-        const savedConfig = localStorage.getItem('portfolioConfig');
-        if (savedConfig) {
-          const parsedConfig = JSON.parse(savedConfig);
-          const mergedConfig = {
-            ...defaultConfig,
-            ...parsedConfig,
-            skills: parsedConfig.skills || defaultConfig.skills,
-            software: parsedConfig.software || defaultConfig.software,
-            projects: parsedConfig.projects || defaultConfig.projects,
-            testimonials: parsedConfig.testimonials || defaultConfig.testimonials
-          };
-          setConfig(mergedConfig);
+      } else {
+        // Load config from localStorage for editing mode
+        try {
+          const savedConfig = localStorage.getItem('portfolioConfig');
+          if (savedConfig) {
+            const parsedConfig = JSON.parse(savedConfig);
+            const mergedConfig = {
+              ...defaultConfig,
+              ...parsedConfig,
+              skills: parsedConfig.skills || defaultConfig.skills,
+              software: parsedConfig.software || defaultConfig.software,
+              projects: parsedConfig.projects || defaultConfig.projects,
+              testimonials: parsedConfig.testimonials || defaultConfig.testimonials,
+              hero: {
+                ...defaultConfig.hero,
+                ...parsedConfig.hero
+              },
+              contact: {
+                ...defaultConfig.contact,
+                ...parsedConfig.contact
+              }
+            };
+            setConfig(mergedConfig);
+          }
+        } catch (error) {
+          console.error('Error loading config:', error);
+          setConfig(defaultConfig);
         }
-      } catch (error) {
-        console.error('Error loading config:', error);
-        setConfig(defaultConfig);
       }
-    }
-  }, []);
+    };
+
+    loadConfig();
+  }, [window.location.search]); // Re-run when search params change
 
   const updateConfig = (newConfig: Partial<PortfolioConfig>) => {
     if (isViewMode) return; // Prevent updates in view mode
@@ -91,8 +119,13 @@ export const usePortfolioConfig = () => {
     try {
       const savedConfigs = localStorage.getItem('sharedPortfolios') || '{}';
       const configs = JSON.parse(savedConfigs);
-      configs[sharedId] = config;
+      
+      // Save a complete copy of the current config
+      configs[sharedId] = { ...config };
+      
+      // Store in localStorage
       localStorage.setItem('sharedPortfolios', JSON.stringify(configs));
+      console.log('Saved shared config:', configs[sharedId]);
       
       // Get the current template from the URL
       const currentPath = window.location.pathname;
@@ -100,7 +133,9 @@ export const usePortfolioConfig = () => {
       
       // Generate the shareable URL
       const baseUrl = window.location.origin;
-      return `${baseUrl}/templates/${template}?share=${sharedId}`;
+      const shareableLink = `${baseUrl}/templates/${template}?share=${sharedId}`;
+      console.log('Generated shareable link:', shareableLink);
+      return shareableLink;
     } catch (error) {
       console.error('Error generating shareable link:', error);
       return '';
