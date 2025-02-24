@@ -20,27 +20,23 @@ export const usePortfolioConfig = () => {
     const loadConfig = async () => {
       try {
         setIsLoading(true);
-        const urlParams = new URLSearchParams(window.location.search);
-        const sharedId = urlParams.get('share');
+        const pathParts = window.location.pathname.split('/');
+        const username = pathParts[1]; // Get username from URL path
         
-        console.log('Loading config with sharedId:', sharedId);
-        
-        if (sharedId) {
+        if (username && username !== 'templates' && username !== 'create') {
           setIsViewMode(true);
           // Try to load shared configuration from localStorage
           const savedConfigs = localStorage.getItem('sharedPortfolios');
-          console.log('Saved shared configs:', savedConfigs);
           
           if (savedConfigs) {
             const configs = JSON.parse(savedConfigs);
-            const sharedConfig = configs[sharedId];
-            console.log('Found shared config:', sharedConfig);
+            const sharedConfig = configs[username];
             
             if (sharedConfig) {
-              // Merge with default config to ensure all required fields exist
+              // Deep clone the shared config to avoid reference issues
               const mergedConfig = {
                 ...defaultConfig,
-                ...sharedConfig,
+                ...JSON.parse(JSON.stringify(sharedConfig)),
                 hero: {
                   ...defaultConfig.hero,
                   ...sharedConfig.hero
@@ -55,11 +51,14 @@ export const usePortfolioConfig = () => {
                   ...sharedConfig.contact
                 }
               };
-              console.log('Setting merged config:', mergedConfig);
               setConfig(mergedConfig);
+            } else {
+              console.error('Shared configuration not found');
+              // Keep default config if shared config is not found
             }
           }
         } else {
+          setIsViewMode(false);
           // Load config from localStorage for editing mode
           const savedConfig = localStorage.getItem('portfolioConfig');
           if (savedConfig) {
@@ -98,22 +97,24 @@ export const usePortfolioConfig = () => {
           contact: { ...defaultConfig.contact }
         });
       } finally {
-        setIsLoading(false);
+        setTimeout(() => {
+          setIsLoading(false);
+        }, 500);
       }
     };
 
     loadConfig();
-  }, [window.location.search]);
+  }, []);
 
   const updateConfig = (newConfig: Partial<PortfolioConfig>) => {
-    if (isViewMode) return; // Prevent updates in view mode
+    if (isViewMode) return;
     const updatedConfig = { ...config, ...newConfig };
     setConfig(updatedConfig);
     localStorage.setItem('portfolioConfig', JSON.stringify(updatedConfig));
   };
 
   const updateField = (path: string[], value: any) => {
-    if (isViewMode) return; // Prevent updates in view mode
+    if (isViewMode) return;
     const newConfig = { ...config };
     let current = newConfig;
     
@@ -129,37 +130,27 @@ export const usePortfolioConfig = () => {
   };
 
   const generateShareableLink = () => {
-    // Generate a unique ID for the shared config
-    const sharedId = Math.random().toString(36).substring(2, 15);
-    
     try {
-      // Save a complete copy of the current config
-      const configToShare = {
-        ...config,
-        hero: { ...config.hero },
-        skills: [...config.skills],
-        software: [...config.software],
-        projects: [...config.projects],
-        testimonials: [...config.testimonials],
-        clients: [...config.clients],
-        contact: { ...config.contact }
-      };
+      // Use the hero name as the username (sanitized for URLs)
+      const username = config.hero.name
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, '')
+        .replace(/\s+/g, '');
+      
+      // Create a deep clone of the current config
+      const configToShare = JSON.parse(JSON.stringify(config));
       
       // Get or initialize shared configs
       const savedConfigs = localStorage.getItem('sharedPortfolios') || '{}';
       const configs = JSON.parse(savedConfigs);
       
-      // Save the config
-      configs[sharedId] = configToShare;
+      // Save the config using username as the key
+      configs[username] = configToShare;
       localStorage.setItem('sharedPortfolios', JSON.stringify(configs));
-      console.log('Saved shared config:', configToShare);
       
-      // Generate the shareable URL
-      const currentPath = window.location.pathname;
-      const template = currentPath.includes('development') ? 'development' : 'graphic';
+      // Generate the shareable URL with username
       const baseUrl = window.location.origin;
-      const shareableLink = `${baseUrl}/templates/${template}?share=${sharedId}`;
-      console.log('Generated shareable link:', shareableLink);
+      const shareableLink = `${baseUrl}/${username}`;
       return shareableLink;
     } catch (error) {
       console.error('Error generating shareable link:', error);
@@ -168,7 +159,7 @@ export const usePortfolioConfig = () => {
   };
 
   const resetConfig = () => {
-    if (isViewMode) return; // Prevent reset in view mode
+    if (isViewMode) return;
     const freshConfig = {
       ...defaultConfig,
       hero: { ...defaultConfig.hero },

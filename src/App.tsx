@@ -4,6 +4,8 @@ import LandingPage from './components/LandingPage';
 import TemplateSelection from './components/TemplateSelection';
 import PortfolioTemplate from './components/PortfolioTemplate';
 import ProfilePage from './components/ProfilePage';
+import GraphicDesignTemplate from './components/templates/GraphicDesignTemplate';
+import DevelopmentTemplate from './components/templates/DevelopmentTemplate';
 
 function App() {
   return (
@@ -15,6 +17,9 @@ function App() {
         <Route path="/portfolio/:id" element={<PortfolioTemplate />} />
         <Route path="/edit/:id" element={<PortfolioTemplate />} />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/templates/graphic" element={<GraphicDesignTemplate />} />
+        <Route path="/templates/development" element={<DevelopmentTemplate />} />
+        <Route path="/:username" element={<GraphicDesignTemplate />} />
       </Routes>
     </Router>
   );
