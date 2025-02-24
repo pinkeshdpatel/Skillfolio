@@ -6,6 +6,7 @@ import AuthModal from './AuthModal';
 import { HeroSection } from './ui/HeroSection';
 import { TestimonialsSection } from './ui/TestimonialsSection';
 import { BentoGrid, type BentoItem } from './ui/bento-grid';
+import logo from '../../logo/skillfolio.svg';
 
 const categories: BentoItem[] = [
   {
@@ -92,8 +93,8 @@ const LandingPage: React.FC = () => {
       <nav className="fixed top-0 w-full z-50 bg-black/20 backdrop-blur-lg border-b border-white/10">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <Link to="/" className="text-2xl font-bold text-gradient">
-              Skillfolio
+            <Link to="/" className="h-8">
+              <img src={logo} alt="Skillfolio" className="h-full" />
             </Link>
             
             {user ? (
